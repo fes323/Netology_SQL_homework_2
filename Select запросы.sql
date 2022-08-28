@@ -33,7 +33,7 @@ select album_id, AVG(track.duration) as AVG_Duration from track
 group by track.album_id;
 
 --4) все исполнители, которые не выпустили альбомы в 2020 году;
-select author.nickname as НЕ_выпускали_альбом_в_2020 from author 
+select author.nickname from author 
 inner join album_author on author.id = album_author.author_id
 inner join album on album.id = album_author.album_id
 where album.release_date not between '2020-01-01' and '2020-12-31';
@@ -66,7 +66,16 @@ where track.duration  <= (
 	);
 
 --9) название альбомов, содержащих наименьшее количество треков.
-select album."name" as track_count from album
-inner join track on album.id = track.album_id
-group by album."name" 
-having count(track.album_id) < 3;
+select album."name" from album
+join track on track.album_id = album.id
+group by album."name"
+having count(track.id) <= (
+	select count(track.id) from album
+	join track on album.id = track.album_id
+	group by album."name"
+	order by count(track.id)
+	limit 1
+);
+
+
+
